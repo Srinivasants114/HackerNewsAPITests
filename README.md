@@ -24,12 +24,12 @@ Tests can be executed individually or it can executed all together.
 Tests can be found under the folder structure 
 src/test/java/RestAssuredAPITest
 
-With Testng we can execute each test can be executed by clicking on the run icon next to the method or
+With Testng each test can be executed by clicking on the run icon next to the method or
 Kickoff all the tests by clicking on the run icon next to the class RestAssuredAPITest
 
-After the tests are executed, the html can be found under the folder
+After the tests are executed, the html report can be found under the folder
 src/test/resources
-Right click -> Open in -> browser -> chrome
+Right click on the html file -> Open in -> browser -> chrome
 
-Logs cane be found under logs/app.log
+Logs can be be found under logs/app.log
 
