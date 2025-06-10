@@ -105,10 +105,66 @@ public class RestAssuredAPITest {
                 reportHelper.printLogAndReport(test, logger, "Status code is not 200 as expected" , "fail");
                 sa.assertTrue(false, "Status code is " + response.getStatusCode());
             }
-            JsonObject jsonObject = JsonParser.parseString(response.asPrettyString()).getAsJsonObject();
-
-            //jsonObject.get("kids").getAsJsonArray().get(0)
-            System.out.println(response.asPrettyString());
+            if(response.asPrettyString() != ""){
+                reportHelper.printLogAndReport(test, logger, "response is not empty as expected - " + response.asPrettyString() , "pass");
+            }else{
+                reportHelper.printLogAndReport(test, logger, "response is empty", "fail");
+                sa.assertTrue(false, "response is empty");
+            }
+            try {
+                //validating response contents
+                JsonObject jsonObject = JsonParser.parseString(response.asPrettyString()).getAsJsonObject();
+                if(jsonObject.get("by").toString() != "" ){
+                    reportHelper.printLogAndReport(test, logger, "Author name - " + jsonObject.get("by").toString(), "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "Author name is empty", "fail");
+                }
+                if(jsonObject.get("descendants").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "descendants - " + jsonObject.get("descendants").toString(), "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "descendants is empty", "fail");
+                }
+                if(jsonObject.get("id").toString().equals(id)){
+                    reportHelper.printLogAndReport(test, logger, "ID matched with response id", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "Id doesn't match Expected - " + id +
+                            " Actual - " +jsonObject.get("id").toString() , "fail");
+                }
+                if(jsonObject.get("kids").getAsJsonArray().size() > 0){
+                    reportHelper.printLogAndReport(test, logger, "Child is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "No child available", "fail");
+                }
+                if(jsonObject.get("score").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "score is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "score is not present", "fail");
+                }
+                if(jsonObject.get("text").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "text is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "text is not present", "fail");
+                }
+                if(jsonObject.get("time").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "time is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "time is not present", "fail");
+                }
+                if(jsonObject.get("title").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "title is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "title is not present", "fail");
+                }
+                if(jsonObject.get("type").toString().replace("\"","").equals("story")){
+                    reportHelper.printLogAndReport(test, logger, "The type should be story", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "The type is not story Expected - story " +
+                            "Actual - " + jsonObject.get("type").toString(), "fail");
+                }
+            }catch(Exception e){
+                reportHelper.printLogAndReport(test, logger, e.getMessage() , "fail");
+                sa.assertTrue(false, e.getMessage());
+            }
         }
         sa.assertAll();
     }
@@ -128,9 +184,9 @@ public class RestAssuredAPITest {
             RequestSpecification httpRequest = RestAssured.given();
             Response response = httpRequest.request(Method.GET, "");
             if(response.getStatusCode() == 404){
-                test.pass("Status code 404 as expected");
+                reportHelper.printLogAndReport(test, logger, "Status code 404 as expected" , "pass");
             }else{
-                test.fail("Status code is not 404 as expected - " + response.getStatusCode());
+                reportHelper.printLogAndReport(test, logger, "Status code is not 404 as expected - " + response.getStatusCode() , "pass");
                 sa.assertTrue(false, "Status code is not 404 as expected - " + response.getStatusCode());
             }
         }
@@ -138,24 +194,80 @@ public class RestAssuredAPITest {
     }
 
     @Test(priority = 2)
-    public void getComment() {
-        ExtentTest test = report.createTest("Get Comment");
-        logger.info("Get Comment");
-        // Specify the base URL to the RESTful web service
-        RestAssured.baseURI = baseURI + "/v0/item/2921983.json?print=pretty";
-        // Get the RequestSpecification of the request to be sent to the server.
-        RequestSpecification httpRequest = RestAssured.given();
-        // specify the method type (GET) and the parameters if any.
-        //In this case the request does not take any parameters
-        Response response = httpRequest.request(Method.GET, "");
-        // Print the status and message body of the response received from the server
-        if(response.getStatusCode() ==200){
-            test.pass("Status code 200 as expected");
+    public void getCommentFromItems() {
+        SoftAssert sa = new SoftAssert();
+        ExtentTest test = report.createTest("Get Comment from Items");
+        reportHelper.printLogAndReport(test, logger, "Get Comment from Items" , "info");
+        if(fetchCommentId() == 0){
+            reportHelper.printLogAndReport(test, logger, "There are no comment from item" , "fail");
+            sa.assertTrue(false, "There are comment from item");
         }else{
-            test.fail("Status code is not 200 as expected");
+            String id = String.valueOf(fetchCommentId());
+            // Specify the base URL to the RESTful web service
+            RestAssured.baseURI = baseURI + itemURI.replace("<id>", id);
+            // Get the RequestSpecification of the request to be sent to the server.
+            RequestSpecification httpRequest = RestAssured.given();
+            // specify the method type (GET) and the parameters if any.
+            //In this case the request does not take any parameters
+            Response response = httpRequest.request(Method.GET, "");
+            if(response.getStatusCode() == 200){
+                reportHelper.printLogAndReport(test, logger, "Status code 200 as expected" , "pass");
+            }else{
+                reportHelper.printLogAndReport(test, logger, "Status code is not 200 as expected" , "fail");
+                sa.assertTrue(false, "Status code is " + response.getStatusCode());
+            }
+            if(response.asPrettyString() != ""){
+                reportHelper.printLogAndReport(test, logger, "response is not empty as expected - " + response.asPrettyString() , "pass");
+            }else{
+                reportHelper.printLogAndReport(test, logger, "response is empty", "fail");
+                sa.assertTrue(false, "response is empty");
+            }
+            try {
+                //validating response contents
+                JsonObject jsonObject = JsonParser.parseString(response.asPrettyString()).getAsJsonObject();
+                if(jsonObject.get("by").toString() != "" ){
+                    reportHelper.printLogAndReport(test, logger, "Author name - " + jsonObject.get("by").toString(), "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "Author name is empty", "fail");
+                }
+                if(jsonObject.get("parent").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "parent - " + jsonObject.get("parent").toString(), "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "parent is empty", "fail");
+                }
+                if(jsonObject.get("id").toString().equals(id)){
+                    reportHelper.printLogAndReport(test, logger, "ID matched with response id", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "Id doesn't match Expected - " + id +
+                            " Actual - " +jsonObject.get("id").toString() , "fail");
+                }
+                if(jsonObject.get("kids").getAsJsonArray().size() > 0){
+                    reportHelper.printLogAndReport(test, logger, "Child is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "No child available", "fail");
+                }
+                if(jsonObject.get("text").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "text is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "text is not present", "fail");
+                }
+                if(jsonObject.get("time").toString() != ""){
+                    reportHelper.printLogAndReport(test, logger, "time is present", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "time is not present", "fail");
+                }
+                if(jsonObject.get("type").toString().replace("\"","").equals("comment")){
+                    reportHelper.printLogAndReport(test, logger, "The type should be comment", "pass");
+                }else{
+                    reportHelper.printLogAndReport(test, logger, "The type is not comment Expected - comment " +
+                            "Actual - " + jsonObject.get("type").toString(), "fail");
+                }
+            }catch(Exception e){
+                reportHelper.printLogAndReport(test, logger, e.getMessage() , "fail");
+                sa.assertTrue(false, e.getMessage());
+            }
         }
-        System.out.println("Status received => " + response.getStatusLine());
-        System.out.println("Response=>" + response.prettyPrint());
+        sa.assertAll();
     }
 
     @AfterMethod()
@@ -163,19 +275,48 @@ public class RestAssuredAPITest {
         report.flush();
     }
 
+    //This method will fetch the top story id
     public int fetchTopStoryId(){
         int topStoryId = 0;
         RestAssured.baseURI = baseURI + topStoriesURI;
         RequestSpecification httpRequest = RestAssured.given();
         Response response = httpRequest.request(Method.GET, "");
-        if(response.getStatusCode() ==200){
+        if(response.getStatusCode() == 200){
             if(response.asPrettyString() != ""){
-                JsonArray jsonArray = JsonParser.parseString(response.asPrettyString()).getAsJsonArray();
-                if(jsonArray.size() > 0){
-                    topStoryId = jsonArray.get(0).getAsInt();
+                try{
+                    JsonArray jsonArray = JsonParser.parseString(response.asPrettyString()).getAsJsonArray();
+                    if(jsonArray.size() > 0){
+                        topStoryId = jsonArray.get(0).getAsInt();
+                    }
+                }catch (Exception e){
+                    reportHelper.printLogAndReport(test, logger, e.getMessage(),"fail");
                 }
+
             }
         }
         return topStoryId;
+    }
+
+    //This method will fetch the comment id of the top story id
+    public int fetchCommentId(){
+        int commentId = 0;
+        int storyId = fetchTopStoryId();
+        if(storyId != 0){
+            String id = String.valueOf(storyId);
+            RestAssured.baseURI = baseURI + itemURI.replace("<id>", id);
+            RequestSpecification httpRequest = RestAssured.given();
+            Response response = httpRequest.request(Method.GET, "");
+            if(response.getStatusCode() == 200){
+                if(response.asPrettyString() != ""){
+                    try{
+                        JsonObject jsonObject = JsonParser.parseString(response.asPrettyString()).getAsJsonObject();
+                        commentId = jsonObject.get("kids").getAsJsonArray().get(0).getAsInt();
+                    }catch (Exception e){
+                        reportHelper.printLogAndReport(test, logger, e.getMessage(),"fail");
+                    }
+                }
+            }
+        }
+        return commentId;
     }
 }

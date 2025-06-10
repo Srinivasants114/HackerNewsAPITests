@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+logs/app.log
+/.idea
+logs/app.log
+*.html
